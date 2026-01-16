@@ -7,7 +7,7 @@ DEFAULT_DIRECTION: Direction = "down"
 # Entity movement settings
 ENTITY_MOVE_SPEED = 1
 ENTITY_MOVE_DIRECTION: list[Direction] = ["down", "up", "left", "right"]
-ENTITY_MOVE_BOUNCE = True
+ENTITY_MOVE_ON_COLLISION = "bounce"
 
 # Reward and cost values
 COIN_REWARD = 5

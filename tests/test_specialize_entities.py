@@ -106,7 +106,7 @@ def test_specialize_every_entity_type():
         create_box(
             pushable=False,
             moving_direction="right",
-            moving_bounce=True,
+            moving_on_collision="bounce",
             moving_speed=1,
         ),
     )
@@ -313,7 +313,7 @@ def test_specialize_roundtrip_preserves_types_and_coordinates():
         create_box(
             pushable=False,
             moving_direction="right",
-            moving_bounce=True,
+            moving_on_collision="bounce",
             moving_speed=1,
         ),
     )

@@ -32,7 +32,7 @@ from grid_adventure.constants import (
     COIN_REWARD,
     ENEMY_DAMAGE,
     HAZARD_DAMAGE,
-    ENTITY_MOVE_BOUNCE,
+    ENTITY_MOVE_ON_COLLISION,
     ENTITY_MOVE_DIRECTION,
     ENTITY_MOVE_SPEED,
     FLOOR_COST,
@@ -71,7 +71,7 @@ class CollectibleEntity(BaseEntity):
 class MovingEntity(BaseEntity):
     moving: Moving = Moving(
         direction=ENTITY_MOVE_DIRECTION[0],
-        bounce=ENTITY_MOVE_BOUNCE,
+        on_collision=ENTITY_MOVE_ON_COLLISION,
         speed=ENTITY_MOVE_SPEED,
     )
 
@@ -83,7 +83,7 @@ class MovingEntity(BaseEntity):
 
         self.moving = Moving(
             direction=direction,
-            bounce=self.moving.bounce,
+            on_collision=self.moving.on_collision,
             speed=self.moving.speed,
         )
 

@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 from grid_universe.state import State
-from grid_universe.levels.grid import Level
-from grid_universe.levels.convert import from_state as base_from_state
-from grid_universe.levels.convert import to_state as base_to_state
-from grid_universe.levels.entity import BaseEntity, copy_entity_components
+from grid_universe.grid.gridstate import GridState
+from grid_universe.grid.convert import from_state as base_from_state
+from grid_universe.grid.convert import to_state as base_to_state
+from grid_universe.grid.entity import BaseEntity, copy_entity_components
+from grid_universe.grid.step import step as base_step
+from grid_universe.actions import Action
 
 # Specialized entity classes from Grid Adventure
 from grid_adventure.entities import (
@@ -112,31 +114,31 @@ def _specialize_nested_list(items: list[BaseEntity] | None) -> list[BaseEntity]:
     return [_specialize_single(item) for item in items]
 
 
-def specialize_entities(level: Level) -> Level:
+def specialize_entities(gridstate: GridState) -> GridState:
     """
-    Returns a new Level with entities replaced by specialized Grid Adventure subclasses.
+    Returns a new GridState with entities replaced by specialized Grid Adventure subclasses.
     Also remaps cross-entity references to the new instances.
     """
-    new_level = Level(
-        width=level.width,
-        height=level.height,
-        movement=level.movement,
-        objective=level.objective,
-        seed=level.seed,
-        turn=level.turn,
-        score=level.score,
-        win=level.win,
-        lose=level.lose,
-        message=level.message,
-        turn_limit=level.turn_limit,
+    new_grid_state = GridState(
+        width=gridstate.width,
+        height=gridstate.height,
+        movement=gridstate.movement,
+        objective=gridstate.objective,
+        seed=gridstate.seed,
+        turn=gridstate.turn,
+        score=gridstate.score,
+        win=gridstate.win,
+        lose=gridstate.lose,
+        message=gridstate.message,
+        turn_limit=gridstate.turn_limit,
     )
 
     # First pass: specialize and map original object id -> new specialized object
     obj_map: dict[int, BaseEntity] = {}
-    for y in range(level.height):
-        for x in range(level.width):
+    for y in range(gridstate.height):
+        for x in range(gridstate.width):
             specialized_cell: list[BaseEntity] = []
-            for orig_obj in level.grid[y][x]:
+            for orig_obj in gridstate.grid[y][x]:
                 spec_obj = _specialize_single(orig_obj)
 
                 # Specialize nested lists if attributes exist (inventory_list, status_list)
@@ -158,16 +160,24 @@ def specialize_entities(level: Level) -> Level:
                 obj_map[id(orig_obj)] = spec_obj
                 specialized_cell.append(spec_obj)
 
-            new_level.grid[y][x] = specialized_cell
-    return new_level
+            new_grid_state.grid[y][x] = specialized_cell
+    return new_grid_state
 
 
-def from_state(state: State) -> Level:
-    """Convert a State to a specialized Level using Grid Adventure entity subclasses."""
-    base_level = base_from_state(state)
-    return specialize_entities(base_level)
+def from_state(state: State) -> GridState:
+    """Convert a State to a specialized GridState using Grid Adventure entity subclasses."""
+    base_grid_state = base_from_state(state)
+    return specialize_entities(base_grid_state)
 
 
-def to_state(level: Level) -> State:
-    """Convert a Level (with specialized Grid Adventure entities) to a State."""
-    return base_to_state(level)
+def to_state(gridstate: GridState) -> State:
+    """Convert a GridState (with specialized Grid Adventure entities) to a State."""
+    return base_to_state(gridstate)
+
+
+def step(gridstate: GridState, action: Action) -> GridState:
+    """Perform one step in the GridState using the base step function."""
+    return specialize_entities(base_step(gridstate, action))
+
+
+__all__ = ["from_state", "to_state", "specialize_entities", "step", "GridState"]

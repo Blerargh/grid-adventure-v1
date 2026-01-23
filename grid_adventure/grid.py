@@ -65,57 +65,66 @@ def _specialize_single(obj: BaseEntity) -> BaseEntity:
 
     # Agent
     if has("agent"):
-        return copy_entity_components(obj, AgentEntity())
+        return copy_entity_components(obj, AgentEntity(), preserve_entity_id=True)
 
     # Exit
     if has("exit"):
-        return copy_entity_components(obj, ExitEntity())
-
+        return copy_entity_components(obj, ExitEntity(), preserve_entity_id=True)
     # Doors (Locked vs Unlocked)
     if app_name == "door":
         if has("locked"):
-            return copy_entity_components(obj, LockedDoorEntity())
-        return copy_entity_components(obj, UnlockedDoorEntity())
+            return copy_entity_components(
+                obj, LockedDoorEntity(), preserve_entity_id=True
+            )
+        return copy_entity_components(
+            obj, UnlockedDoorEntity(), preserve_entity_id=True
+        )
 
     # Key
     if has("key"):
-        return copy_entity_components(obj, KeyEntity())
+        return copy_entity_components(obj, KeyEntity(), preserve_entity_id=True)
 
     # Portal
     if has("portal"):
-        return copy_entity_components(obj, PortalEntity())
-
+        return copy_entity_components(obj, PortalEntity(), preserve_entity_id=True)
     # Collectibles
     if has("collectible"):
         # Power-ups first
         if has("speed"):
-            return copy_entity_components(obj, SpeedPowerUpEntity())
+            return copy_entity_components(
+                obj, SpeedPowerUpEntity(), preserve_entity_id=True
+            )
         if has("immunity"):
-            return copy_entity_components(obj, ShieldPowerUpEntity())
+            return copy_entity_components(
+                obj, ShieldPowerUpEntity(), preserve_entity_id=True
+            )
         if has("phasing"):
-            return copy_entity_components(obj, PhasingPowerUpEntity())
+            return copy_entity_components(
+                obj, PhasingPowerUpEntity(), preserve_entity_id=True
+            )
         # Gem vs coin
         if app_name == "core" or has("requirable"):
-            return copy_entity_components(obj, GemEntity())
-        return copy_entity_components(obj, CoinEntity())
-
+            return copy_entity_components(obj, GemEntity(), preserve_entity_id=True)
+        return copy_entity_components(obj, CoinEntity(), preserve_entity_id=True)
     # Boxes: moving vs static
     if app_name == "box":
         if has("moving"):
-            return copy_entity_components(obj, MovingBoxEntity())
-        return copy_entity_components(obj, BoxEntity())
+            return copy_entity_components(
+                obj, MovingBoxEntity(), preserve_entity_id=True
+            )
+        return copy_entity_components(obj, BoxEntity(), preserve_entity_id=True)
 
     # Hazards / monsters
     if app_name == "lava":
-        return copy_entity_components(obj, LavaEntity())
+        return copy_entity_components(obj, LavaEntity(), preserve_entity_id=True)
     if app_name == "monster" or app_name == "robot":
-        return copy_entity_components(obj, RobotEntity())
+        return copy_entity_components(obj, RobotEntity(), preserve_entity_id=True)
 
     # Background tiles
     if app_name == "floor":
-        return copy_entity_components(obj, FloorEntity())
+        return copy_entity_components(obj, FloorEntity(), preserve_entity_id=True)
     if app_name == "wall":
-        return copy_entity_components(obj, WallEntity())
+        return copy_entity_components(obj, WallEntity(), preserve_entity_id=True)
 
     # Fallback
     return obj

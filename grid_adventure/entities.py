@@ -24,7 +24,7 @@ from grid_universe.components.properties.pushable import Pushable
 from grid_universe.components.properties.requirable import Requirable
 from grid_universe.components.properties.rewardable import Rewardable
 from grid_universe.components.properties.status import Status
-from grid_universe.levels.entity import BaseEntity
+from grid_universe.grid.entity import BaseEntity
 
 from grid_adventure.constants import (
     DEFAULT_AGENT_HEALTH,

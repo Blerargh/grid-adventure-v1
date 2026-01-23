@@ -1,6 +1,6 @@
-from grid_universe.levels.grid import Level
-from grid_universe.levels.convert import to_state
-from grid_universe.levels.factories import (
+from grid_universe.grid.gridstate import GridState
+from grid_universe.grid.convert import to_state
+from grid_universe.grid.factories import (
     create_agent,
     create_floor,
     create_wall,
@@ -18,11 +18,11 @@ from grid_universe.levels.factories import (
     create_phasing_effect,
 )
 from grid_universe.components.properties.appearance import Appearance
-from grid_universe.levels.entity import Entity
+from grid_universe.grid.entity import Entity
 from grid_universe.movements import BaseMovement
 from grid_universe.objectives import BaseObjective
 
-from grid_adventure.level import specialize_entities, from_state
+from grid_adventure.grid import specialize_entities, from_state
 from grid_adventure.entities import (
     AgentEntity,
     FloorEntity,
@@ -44,8 +44,8 @@ from grid_adventure.entities import (
 )
 
 
-def _flatten(level: Level):
-    for y, row in enumerate(level.grid):
+def _flatten(gridstate: GridState):
+    for y, row in enumerate(gridstate.grid):
         for x, cell in enumerate(row):
             for obj in cell:
                 yield (x, y, obj)
@@ -53,8 +53,8 @@ def _flatten(level: Level):
 
 def test_specialize_every_entity_type():
     """Ensure each generic Entity type is specialized to the correct subclass and placed at the right coordinates."""
-    # Sandbox level with one of each kind
-    level = Level(
+    # Sandbox gridstate with one of each kind
+    gridstate = GridState(
         width=10,
         height=10,
         movement=BaseMovement(
@@ -88,26 +88,26 @@ def test_specialize_every_entity_type():
     }
 
     # Populate
-    level.add(coords["agent"], create_agent())
-    level.add(coords["floor"], create_floor())
-    level.add(coords["wall"], create_wall())
-    level.add(coords["exit"], create_exit())
-    level.add(coords["coin"], create_coin())
-    level.add(coords["core"], create_core(required=True))
-    level.add(coords["key"], create_key(key_id="A"))
-    level.add(coords["locked_door"], create_door(key_id="A"))
+    gridstate.add(coords["agent"], create_agent())
+    gridstate.add(coords["floor"], create_floor())
+    gridstate.add(coords["wall"], create_wall())
+    gridstate.add(coords["exit"], create_exit())
+    gridstate.add(coords["coin"], create_coin())
+    gridstate.add(coords["core"], create_core(required=True))
+    gridstate.add(coords["key"], create_key(key_id="A"))
+    gridstate.add(coords["locked_door"], create_door(key_id="A"))
     # Unlocked door: appearance only, no Locked
-    level.add(
+    gridstate.add(
         coords["unlocked_door"], Entity(appearance=Appearance(name="door", priority=6))
     )
     # Portals
     p1 = create_portal()
     p2 = create_portal(pair=p1)
-    level.add(coords["portal_a"], p1)
-    level.add(coords["portal_b"], p2)
+    gridstate.add(coords["portal_a"], p1)
+    gridstate.add(coords["portal_b"], p2)
     # Boxes
-    level.add(coords["box"], create_box(pushable=True))
-    level.add(
+    gridstate.add(coords["box"], create_box(pushable=True))
+    gridstate.add(
         coords["moving_box"],
         create_box(
             pushable=False,
@@ -117,14 +117,14 @@ def test_specialize_every_entity_type():
         ),
     )
     # Hostiles / hazards
-    level.add(coords["monster"], create_monster(damage=1, lethal=False))
-    level.add(coords["lava"], create_hazard("lava", damage=2, lethal=True))
+    gridstate.add(coords["monster"], create_monster(damage=1, lethal=False))
+    gridstate.add(coords["lava"], create_hazard("lava", damage=2, lethal=True))
     # Power-ups
-    level.add(coords["speed"], create_speed_effect(multiplier=2, time=5))
-    level.add(coords["shield"], create_immunity_effect(usage=5))
-    level.add(coords["phasing"], create_phasing_effect(time=5))
+    gridstate.add(coords["speed"], create_speed_effect(multiplier=2, time=5))
+    gridstate.add(coords["shield"], create_immunity_effect(usage=5))
+    gridstate.add(coords["phasing"], create_phasing_effect(time=5))
 
-    specialized = specialize_entities(level)
+    specialized = specialize_entities(gridstate)
 
     # Build a quick index: (x,y) -> list of specialized types at that cell
     by_pos: dict[tuple[int, int], list[type]] = {}
@@ -204,7 +204,7 @@ def test_specialize_every_entity_type():
     assert counts["ShieldPowerUpEntity"] == 1
     assert counts["PhasingPowerUpEntity"] == 1
 
-    # Behavioral/attribute checks (portal pairing is established during Level->State conversion; not asserted here)
+    # Behavioral/attribute checks (portal pairing is established during GridState->State conversion; not asserted here)
     # MovingBox must have Moving; Box must not
     moving_box = next(
         obj for _, _, obj in _flatten(specialized) if isinstance(obj, MovingBoxEntity)
@@ -265,9 +265,9 @@ def test_specialize_every_entity_type():
 
 
 def test_specialize_roundtrip_preserves_types_and_coordinates():
-    """Round‑trip through State -> Grid Adventure Level should preserve specialization and coordinates."""
+    """Round‑trip through State -> Grid Adventure GridState should preserve specialization and coordinates."""
     # Reuse a comprehensive sandbox
-    level = Level(
+    gridstate = GridState(
         width=10,
         height=10,
         movement=BaseMovement(
@@ -301,24 +301,24 @@ def test_specialize_roundtrip_preserves_types_and_coordinates():
     }
 
     # Populate objects
-    level.add(coords["agent"], create_agent())
-    level.add(coords["floor"], create_floor())
-    level.add(coords["wall"], create_wall())
-    level.add(coords["exit"], create_exit())
-    level.add(coords["coin"], create_coin())
-    level.add(coords["core"], create_core(required=True))
-    level.add(coords["key"], create_key(key_id="A"))
-    level.add(coords["locked_door"], create_door(key_id="A"))
-    level.add(
+    gridstate.add(coords["agent"], create_agent())
+    gridstate.add(coords["floor"], create_floor())
+    gridstate.add(coords["wall"], create_wall())
+    gridstate.add(coords["exit"], create_exit())
+    gridstate.add(coords["coin"], create_coin())
+    gridstate.add(coords["core"], create_core(required=True))
+    gridstate.add(coords["key"], create_key(key_id="A"))
+    gridstate.add(coords["locked_door"], create_door(key_id="A"))
+    gridstate.add(
         coords["unlocked_door"], Entity(appearance=Appearance(name="door", priority=6))
     )
     p1 = create_portal()
     p2 = create_portal(pair=p1)
-    level.add(coords["portal_a"], p1)
-    level.add(coords["portal_b"], p2)
+    gridstate.add(coords["portal_a"], p1)
+    gridstate.add(coords["portal_b"], p2)
 
-    level.add(coords["box"], create_box(pushable=True))
-    level.add(
+    gridstate.add(coords["box"], create_box(pushable=True))
+    gridstate.add(
         coords["moving_box"],
         create_box(
             pushable=False,
@@ -327,14 +327,14 @@ def test_specialize_roundtrip_preserves_types_and_coordinates():
             moving_speed=1,
         ),
     )
-    level.add(coords["monster"], create_monster(damage=1, lethal=False))
-    level.add(coords["lava"], create_hazard("lava", damage=2, lethal=True))
-    level.add(coords["speed"], create_speed_effect(multiplier=2, time=5))
-    level.add(coords["shield"], create_immunity_effect(usage=5))
-    level.add(coords["phasing"], create_phasing_effect(time=5))
+    gridstate.add(coords["monster"], create_monster(damage=1, lethal=False))
+    gridstate.add(coords["lava"], create_hazard("lava", damage=2, lethal=True))
+    gridstate.add(coords["speed"], create_speed_effect(multiplier=2, time=5))
+    gridstate.add(coords["shield"], create_immunity_effect(usage=5))
+    gridstate.add(coords["phasing"], create_phasing_effect(time=5))
 
-    # Specialize -> State -> specialized Level roundtrip
-    specialized = specialize_entities(level)
+    # Specialize -> State -> specialized GridState roundtrip
+    specialized = specialize_entities(gridstate)
     state = to_state(specialized)
     roundtrip_level = from_state(state)
 
